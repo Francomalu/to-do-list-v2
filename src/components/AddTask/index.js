@@ -4,23 +4,42 @@ import {
   Input,
   FormLabel,
   Textarea,
-  propNames,
+  Stack,
 } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import shortid from "shortid";
 
-function AddTask(props) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setFocus,
-    formState: { errors },
-  } = useForm({});
-  function onSubmit(data) {
-    props.addTask({ ...data, id: shortid.generate(), done: false });
-    reset();
+function AddTask({ addTask, task }) {
+  const initialForm = {
+    name: "",
+    description: "",
+  };
+
+  const [formValues, setFormValues] = useState(initialForm);
+  const { name, description } = formValues;
+
+  useEffect(() => {
+    if (task) {
+      setFormValues(task);
+    }
+  }, [task]);
+  function handleSubmit(e) {
+    e.preventDefault();
+    addTask({ ...formValues, id: shortid.generate(), done: false });
   }
+
+  function handleChangeInput(e) {
+    const changedValues = {
+      ...formValues,
+      [e.target.name]: e.target.value,
+    };
+    setFormValues(changedValues);
+  }
+
+  function handleUpdate() {
+    addTask(formValues);
+  }
+
   return (
     <form
       style={{
@@ -29,12 +48,14 @@ function AddTask(props) {
         flexDirection: "column",
         padding: "10px",
       }}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit}
     >
       <FormControl>
         <FormLabel htmlFor="name">Nombre de la tarea</FormLabel>
         <Input
-          {...register("name", { required: true, maxLength: 50 })}
+          name="name"
+          value={name}
+          onChange={handleChangeInput}
           type="text"
           border="2px solid"
           borderColor="yellow.700"
@@ -46,7 +67,9 @@ function AddTask(props) {
       <FormControl>
         <FormLabel htmlFor="description">Descripción de la tarea</FormLabel>
         <Textarea
-          {...register("description", { required: true, maxLength: 300 })}
+          name="description"
+          value={description}
+          onChange={handleChangeInput}
           borderRadius="0.375rem"
           border="2px solid"
           borderColor="yellow.700"
@@ -56,18 +79,30 @@ function AddTask(props) {
           _hover={{ borderColor: "yellow.700" }}
         />
       </FormControl>
-      <Button
-        type="submit"
-        background="yellow.700"
-        variant="solid"
-        mt="4"
-        maxWidth="30%"
-        border="2px solid"
-        borderColor="yellow.700"
-        _hover={{ background: "gray.200" }}
-      >
-        Agregar
-      </Button>
+      <Stack direction="row" alignItems="center" mt="4">
+        <Button
+          type="submit"
+          background="yellow.700"
+          variant="solid"
+          maxWidth="30%"
+          border="2px solid"
+          borderColor="yellow.700"
+          _hover={{ background: "gray.200" }}
+        >
+          Agregar
+        </Button>
+        <Button
+          onClick={handleUpdate}
+          background="yellow.700"
+          variant="solid"
+          maxWidth="100%"
+          border="2px solid"
+          borderColor="yellow.700"
+          _hover={{ background: "gray.200" }}
+        >
+          Actualizar tarea
+        </Button>
+      </Stack>
     </form>
   );
 }

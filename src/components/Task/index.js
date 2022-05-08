@@ -21,6 +21,7 @@ function Task(props) {
       </Stack>
       <Stack direction="column" justifyContent="space-between">
         <Button
+          onClick={() => handleTask(task, "UPDATE_TASK")}
           background="yellow.700"
           variant="solid"
           maxWidth="100%"

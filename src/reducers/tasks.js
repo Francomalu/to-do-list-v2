@@ -4,6 +4,7 @@ import {
   DONE_TASK,
   GET_COMPLETED,
   GET_TASK,
+  UPDATE_TASK,
 } from "../actions/tasks";
 
 export const initialState = {
@@ -14,15 +15,33 @@ export const initialState = {
   filterChecked: false,
 };
 
-export default function TaskReducer(state = initialState, action) {
+export default function TaskReducer(state, action) {
   switch (action.type) {
-    case ADD_TASK: {
-      return {
-        ...state,
-        tasks: [action.payload, ...state.tasks],
-        tasksFiltered: [action.payload, ...state.tasks],
-      };
-    }
+    case ADD_TASK:
+      const task = state.tasks.find((t) => t.id === action.payload.id);
+      if (task) {
+        const newTask = state.tasks.map((e) => {
+          if (e.id === action.payload.id)
+            return {
+              ...e,
+              name: action.payload.name,
+              description: action.payload.description,
+            };
+          return e;
+        });
+        return {
+          ...state,
+          tasks: newTask,
+          tasksFiltered: newTask,
+        };
+      } else {
+        return {
+          ...state,
+          tasks: [action.payload, ...state.tasks],
+          tasksFiltered: [action.payload, ...state.tasks],
+        };
+      }
+
     case GET_TASK: {
       const findTask = state.tasks.find((task) => task.id == action.payload.id);
       return {
@@ -31,17 +50,15 @@ export default function TaskReducer(state = initialState, action) {
       };
     }
     case DELETE_TASK: {
-      const newTasks = state.tasks.filter((task) => task.id !== action.payload);
       return {
         ...state,
-        tasks: newTasks,
-        tasksFiltered: newTasks.filter(
+        tasks: state.tasks.filter((task) => task.id !== action.payload),
+        tasksFiltered: state.tasks.filter(
           (task) => task.done == state.filterChecked
         ),
       };
     }
     case DONE_TASK: {
-      console.log(state.filterChecked);
       const newArr = state.tasks.map((task) => {
         if (task.id === action.payload) {
           return { ...task, done: !task.done };
